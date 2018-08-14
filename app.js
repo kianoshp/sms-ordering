@@ -4,13 +4,17 @@ const port        = 3000
 const app         = require('express')()
 const creds       = require('./config')
 const client      = require('twilio')(creds.accountSid, creds.authToken)
-const sendMessage = require('./send').message
+const sendMessage = require('./send')
 const MessagingResponse = require('twilio').twiml.MessagingResponse
 const dbConnect         = require('./db')
 const dbClient  = require('mongodb').MongoClient
 const url       = 'mongodb://localhost/FavoritesDB'
 
-// sendMessage('This is the ship that made the Kessel Run in fourteen parsecs?', creds.From, creds.To).done();
+
+sendMessage.sendSms(
+  '17819623739',
+  'this is a test message'
+  )
 
 app.post('/sms', (req, res) => {
   const twiml = new MessagingResponse();
@@ -20,15 +24,6 @@ app.post('/sms', (req, res) => {
   res.writeHead(200, {'Content-Type': 'text/xml'});
   res.end(twiml.toString());
 })
-
-client.messages
-  .create({
-     body: 'This is the ship that made the Kessel Run in fourteen parsecs?',
-     from: creds.From,
-     to: creds.To
-   })
-  .then(message => console.log(message.sid))
-  .done();
 
 // dbConnect.connect();
 
