@@ -2,8 +2,18 @@ const creds   = require('./config')
 const client  = require('twilio')(creds.accountSid, creds.authToken)
 
 
-exports.message = function (body, from, to) {
-  client.messages
-    .create(body, from, to)
-    .then(message => console.log(message.sid));
+module.exports.sendSms = function (to, message) {
+  return client.api.messages
+    .create({
+      body: message, 
+      to: to,
+      from: creds.From
+    })
+    .then((data) => {
+      console.log('message sent')
+    })
+    .catch((err) => {
+      console.error('could not send message'); 
+      console.error(err);
+    })
 }
