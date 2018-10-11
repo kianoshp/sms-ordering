@@ -1,2 +1,2 @@
 # sms-ordering
-the ability to be able to order quickly through SMS
+The ability to order quickly through SMS
