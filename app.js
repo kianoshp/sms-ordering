@@ -1,30 +1,41 @@
-// content of app.js
-const http        = require('http')
-const port        = 3000
-const app         = require('express')()
-const message     = require('./message')
-// const dbConnect         = require('./db')
-// const dbClient  = require('mongodb').MongoClient
-// const url       = 'mongodb://localhost/FavoritesDB'
+var createError = require('http-errors');
+var express = require('express');
+var path = require('path');
+var cookieParser = require('cookie-parser');
+var logger = require('morgan');
 
-message.sendSms(
-  '17819623739',
-  'this is a test message'
-  )
+var indexRouter = require('./routes/index');
+var usersRouter = require('./routes/users');
 
-message.receiveSms(app)
+var app = express();
 
-// dbConnect.connect();
+// view engine setup
+app.set('views', path.join(__dirname, 'views'));
+app.set('view engine', 'pug');
 
+app.use(logger('dev'));
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
+app.use(cookieParser());
+app.use(express.static(path.join(__dirname, 'public')));
 
-// dbClient.connect(url, function(err,db) {
-//   console.log('Connected');
-//   db.close();
-// });
+app.use('/', indexRouter);
+app.use('/users', usersRouter);
 
-app.listen(port, (err) => {
-  if (err) {
-    return console.log('something bad happened', err)
-  }
-  console.log(`Express server is listening on ${port}`)
-})
+// catch 404 and forward to error handler
+app.use(function(req, res, next) {
+  next(createError(404));
+});
+
+// error handler
+app.use(function(err, req, res, next) {
+  // set locals, only providing error in development
+  res.locals.message = err.message;
+  res.locals.error = req.app.get('env') === 'development' ? err : {};
+
+  // render the error page
+  res.status(err.status || 500);
+  res.render('error');
+});
+
+module.exports = app;
