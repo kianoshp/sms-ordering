@@ -3,7 +3,7 @@ var router = express.Router();
 var db = require('../bin/db');
 
 /* GET users listing. */
-router.get('/allUsers', function(req, res, next) {
+router.get('/all', function(req, res, next) {
   db.query('SELECT * from users ORDER BY id ASC;', (error, results) => {
     if (error) {
       throw error;
@@ -13,8 +13,11 @@ router.get('/allUsers', function(req, res, next) {
   });
 });
 
+/**
+ * get user based on email
+ */
 router.get('/user', (req, res, next) => {
-  db.query(`SELECT * from users where email='${req.query.email}' ORDER BY last_name ASC;`, (error, result) => {
+  db.query(`SELECT * from users where email='${req.query.email}' ORDER BY last_name ASC`, (error, result) => {
     if (error) {
       throw error;
     }
@@ -23,6 +26,22 @@ router.get('/user', (req, res, next) => {
   });
 });
 
+/**
+ * get user based on id
+ */
+router.get('/user', (req, res, next) => {
+  db.query(`SELECT * from users where id='${req.query.id}'`, (error, result) => {
+    if (error) {
+      throw error;
+    }
+
+    res.json(result.rows);
+  });
+});
+
+/**
+ * Create new user
+ */
 router.post('/user', (req, res, next) => {
   const {email, phone, password, first_name, last_name} = req.body;
   console.log('I am about to add ' + email + ' ' + password + ' ' + phone + ' ' + first_name + ' ' + last_name);
@@ -44,6 +63,12 @@ router.post('/user', (req, res, next) => {
     });
 });
 
+/**
+ * Update user based on id
+ * 
+ * reqest body should have all elements of a user
+ * except for password (id, email, phone, first_name, last_name)
+ */
 router.put('/user', (req,res,next) => {
   const {id, email, phone, first_name, last_name} = req.body;
 
