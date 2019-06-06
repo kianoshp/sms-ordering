@@ -1,5 +1,5 @@
-var express = require('express');
-var router = express.Router();
+const express = require('express');
+const router = express.Router();
 const users = require('../controllers/users');
 
 /* GET users listing. */
@@ -33,10 +33,19 @@ router.route('/user')
 router.route('/userInfoUpdate')
   .put(users.updateUserInfo);
 
+/**
+ * Function that deletes a user
+ */
 router.route('/userDelete')
   .delete(users.deleteUser);
 
-router.route('/userByPassword')
-  .post(users.getUserByPassword);
+/**
+ * Find user based on password and email
+ */
+router.route('/login')
+  .post(users.loginUser);
+
+router.route('/updatePassword')
+  .put(users.updateUserPassword);
 
 module.exports = router;

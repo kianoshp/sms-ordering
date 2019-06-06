@@ -3,7 +3,6 @@ var db = require('../bin/db');
 const users = {
   createUser: (req, res, next) => {
     const {email, phone, password, first_name, last_name} = req.body;
-    console.log('I am about to add ' + email + ' ' + password + ' ' + phone + ' ' + first_name + ' ' + last_name);
   
     db.query(`INSERT INTO users (email, phone, password, first_name, last_name) 
       VALUES('${email}', '${phone}', crypt('${password}', gen_salt('md5')), '${first_name}', '${last_name}') 
@@ -11,7 +10,11 @@ const users = {
       (error, results) => {
         if (error) {
           if (error.code === '23505') {
-            res.status(500).send({'error': error.detail, 'constraint': error.constraint});
+            res.status(500).send({
+              'status': 1002,
+              'error': error.detail, 
+              'message': error.constraint
+            });
             next(error);
           } else {
             next(error);
@@ -24,7 +27,7 @@ const users = {
   },
   updateUserInfo: (req, res, next) => {
     const {id, email, phone, first_name, last_name} = req.body;
-    console.log('I am here');
+
     db.query(`UPDATE users set email='${email}',  
     phone='${phone}',
     first_name='${first_name}',
@@ -68,21 +71,51 @@ const users = {
     db.query(`DELETE from users where id='${req.body.id}'`, (error, results) => {
       if(error) next(error);
 
-      console.log('results', results);
       res.json(req.body.id);
     })
   },
-  getUserByPassword: (req, res, next) => {
-    db.query(`SELECT * from users where password=crypt('${req.body.password}', password)`, (error, result) => {
+  loginUser: (req, res, next) => {
+    db.query(`SELECT * from users where password=crypt('${req.body.password}', password) and email='${req.body.email}'`, 
+    (error, result) => {
       if (error) {
         next(error);
       }
-  
-      res.json(result.rows);
+
+      if(result.rows.length === 0) {
+        const errorMsg = 'The email/password combination does not match any of our records.'
+        res.status(500).send({
+          'status': 1003,
+          'message': errorMsg
+        });
+
+        return
+         new Error(errorMsg);
+      } else {
+        res.json(result.rows);
+      }
     });
   },
   updateUserPassword: (req, res, next) => {
+    if (req.body.newPassword === req.body.currentPassword) {
+      const errorMsg = 'Your new password cannot be the same as your current password';
+      res.status(500).send({
+        'status': 1001,
+        'message': errorMsg
+      });
+      // return;
+      return new Error(errorMsg);
+    }
+    db.query(`UPDATE users set password=crypt('${req.body.newPassword}', gen_salt('md5'))
+      where password=crypt('${req.body.currentPassword}', password)
+      RETURNING id`, (error, result) => {
+        if(error) {
+          next(error);
+        }
 
+        res.json(result.rows[0].id);
+      });
+
+    res.status(200);
   }
 }
 
