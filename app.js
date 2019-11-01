@@ -3,7 +3,7 @@ const http        = require('http')
 const port        = 3000
 const app         = require('express')()
 const message     = require('./message')
-// const dbConnect         = require('./db')
+const dbConnect   = require('./db')
 // const dbClient  = require('mongodb').MongoClient
 // const url       = 'mongodb://localhost/FavoritesDB'
 
@@ -14,7 +14,7 @@ message.sendSms(
 
 message.receiveSms(app)
 
-// dbConnect.connect();
+dbConnect.connect();
 
 
 // dbClient.connect(url, function(err,db) {
